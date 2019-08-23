@@ -2013,7 +2013,7 @@ def request_remote_site():
     )
 
     if parse.remote_response.url != parse.remote_url:
-        warnprint("requests's remote url", parse.remote_response.url,
+        warnprint(request.headers.getlist("X-Forwarded-For")[0], "requests's remote url", parse.remote_response.url,
                   'does no equals our rewrited url', parse.remote_url)
 
     if 400 <= parse.remote_response.status_code <= 599:
