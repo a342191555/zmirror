@@ -528,7 +528,7 @@ def cron_task_container(task_dict, add_task_only=False):
     if not add_task_only:
         # 执行任务
         try:
-            infoprint('CronTask:', task_dict.get('name', str(task_dict['target'])), 'Target:', str(task_dict['target']))
+            # infoprint('CronTask:', task_dict.get('name', str(task_dict['target'])), 'Target:', str(task_dict['target']))
 
             target_func = task_dict.get('target')
             if target_func is None:
