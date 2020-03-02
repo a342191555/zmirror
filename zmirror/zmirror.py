@@ -2013,7 +2013,7 @@ def request_remote_site():
     )
 
     if parse.remote_response.url != parse.remote_url:
-        warnprint(request.headers.getlist("X-Forwarded-For")[0], "requests's remote url", parse.remote_response.url,
+        warnprint(request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip(), "requests's remote url", parse.remote_response.url,
                   'does no equals our rewrited url', parse.remote_url)
 
     if 400 <= parse.remote_response.status_code <= 599:
@@ -2045,15 +2045,15 @@ def filter_client_request():
     if human_ip_verification_enabled and (
                 ((human_ip_verification_whitelist_from_cookies or enable_custom_access_cookie_generate_and_verify)
                  and must_verify_cookies)
-            or is_ip_not_in_allow_range(request.headers.getlist("X-Forwarded-For")[0])
+            or is_ip_not_in_allow_range(request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip())
     ):
-        dbgprint('ip', request.headers.getlist("X-Forwarded-For")[0], 'is verifying cookies')
+        dbgprint('ip', request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip(), 'is verifying cookies')
         if 'zmirror_verify' in request.cookies and \
                 ((human_ip_verification_whitelist_from_cookies and verify_ip_hash_cookie(request.cookies.get('zmirror_verify')))
                  or (enable_custom_access_cookie_generate_and_verify and custom_verify_access_cookie(
                         request.cookies.get('zmirror_verify'), request))):
-            ip_whitelist_add(request.headers.getlist("X-Forwarded-For")[0], info_record_dict=request.cookies.get('zmirror_verify'))
-            dbgprint('add to ip_whitelist because cookies:', request.headers.getlist("X-Forwarded-For")[0])
+            ip_whitelist_add(request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip(), info_record_dict=request.cookies.get('zmirror_verify'))
+            dbgprint('add to ip_whitelist because cookies:', request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip())
         else:
             return redirect(
                 "/ip_ban_verify_page?origin=" + base64.urlsafe_b64encode(str(request.url).encode(encoding='utf-8')).decode(
@@ -2251,7 +2251,7 @@ def zmirror_after_request(response):
 @app.route('/zmirror_stat')
 def zmirror_status():
     """返回服务器的一些状态信息"""
-    if request.headers.getlist("X-Forwarded-For")[0] and request.headers.getlist("X-Forwarded-For")[0] != '127.0.0.1':
+    if request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip() and request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip() != '127.0.0.1':
         return generate_simple_resp_page(b'Only 127.0.0.1 are allowed', 403)
     output = ""
     output += strx('extract_real_url_from_embedded_url', extract_real_url_from_embedded_url.cache_info())
@@ -2280,7 +2280,7 @@ def zmirror_status():
 def ip_ban_verify_page():
     """生成一个身份验证页面"""
     if request.method == 'GET':
-        dbgprint('Verifying IP:', request.headers.getlist("X-Forwarded-For")[0])
+        dbgprint('Verifying IP:', request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip())
         form_body = ''
         for q_id, _question in enumerate(human_ip_verification_questions):
             form_body += r"""%s <input type="text" name="%d" placeholder="%s" style="width: 190px;" /><br/>""" \
@@ -2393,7 +2393,7 @@ def ip_ban_verify_page():
             )
             record_dict['__zmirror_verify'] = _hash
 
-        ip_whitelist_add(request.headers.getlist("X-Forwarded-For")[0], info_record_dict=record_dict)
+        ip_whitelist_add(request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip(), info_record_dict=record_dict)
         return resp
 
 
